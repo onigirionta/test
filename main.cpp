@@ -3,7 +3,8 @@
 #include <iomanip>
 #include <fstream>
 
-void gnvoerk(const vector<vector<double>>& xss, ostream& out) {
+void
+gnvoerk(const vector<vector<double>>& xss, ostream& out) {
     out << setprecision(12);
     for (auto& xs : xss) {
         for (auto x : xs) {
