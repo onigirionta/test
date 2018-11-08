@@ -72,14 +72,11 @@ public:
 
         if (xs[0] == 3){
             if (_master_tick < 0){
-                fill(begin(_column), end(_column), 0);
                 _master_tick = xs[2];
                 return {};
             }
-            auto column = _column;
-            fill(begin(_column), end(_column), 0);
             _master_tick = xs[2];
-            return column;
+            return _column;
         }
         return {};
     }
