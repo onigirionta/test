@@ -57,7 +57,7 @@ parse_line(string in) {
 
 class ColumnExtractor {
 public:
-    ColumnExtractor() : _master_tick{-1}, _column(6) {}
+    ColumnExtractor() : _master_tick{-1}, _column(6), _has_data{false} {}
 
     optional<vector<double>>
     take_line(const vector<double>& xs) {
@@ -67,6 +67,7 @@ public:
             }
             int index = static_cast<size_t>(xs[3]) - 1;
             _column[index] = xs[4];
+            _has_data = true;
             return {};
         }
 
@@ -75,7 +76,18 @@ public:
                 _master_tick = xs[2];
                 return {};
             }
+
+            const auto column = current_column();
             _master_tick = xs[2];
+            _has_data = false;
+            return column;
+        }
+        return {};
+    }
+
+    optional<vector<double>>
+    current_column()const{
+        if (_has_data) {
             return _column;
         }
         return {};
@@ -84,6 +96,7 @@ public:
 private:
     int _master_tick;
     vector<double> _column;
+    bool _has_data;
 };
 
 struct OfflineResult {
@@ -121,6 +134,15 @@ go(istream& in) {
             //пропуск ошибочной строки
         }
     }
+
+    if (auto column = ce.current_column()) {
+        out.matrix.push_back(*column);
+    }
+
+    if (out.matrix.size() == 1){
+        out.matrix.push_back(out.matrix[0]);
+    }
+
     cerr << "Lines processed: " << line_counter
          <<"\nError lines: " << line_error_counter << "\n";
     return out;
