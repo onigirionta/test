@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <optional>
 #include <sstream>
 #include "json.hpp"
 
@@ -54,9 +55,51 @@ parse_line(string in) {
     }
 }
 
-vector<vector<double>>
+class ColumnExtractor {
+public:
+    ColumnExtractor() : _master_tick{-1}, _column(6) {}
+
+    optional<vector<double>>
+    take_line(const vector<double>& xs) {
+        if (xs[0] == 1){
+            if (xs[2] != _master_tick){
+                return {};
+            }
+            int index = static_cast<size_t>(xs[3]) - 1;
+            _column[index] = xs[4];
+            return {};
+        }
+
+        if (xs[0] == 3){
+            if (_master_tick < 0){
+                fill(begin(_column), end(_column), 0);
+                _master_tick = xs[2];
+                return {};
+            }
+            auto column = _column;
+            fill(begin(_column), end(_column), 0);
+            _master_tick = xs[2];
+            return column;
+        }
+        return {};
+    }
+
+private:
+    int _master_tick;
+    vector<double> _column;
+};
+
+struct OfflineResult {
+    vector<vector<double>> source;
+    vector<vector<double>> matrix;  // column-major (array of columns)
+};
+
+OfflineResult
 go(istream& in) {
-    vector<vector<double>> out;
+    ColumnExtractor ce;
+
+    OfflineResult out;
+
     int line_counter = 0;
     int line_error_counter = 0;
     while (in) {
@@ -66,9 +109,17 @@ go(istream& in) {
             break;
         }
         line_counter++;
-        try{
-            out.push_back(parse_line(line));
-        }catch(...){
+
+        try {
+            const auto xs = parse_line(line);
+
+            out.source.push_back(xs);
+
+            const auto column = ce.take_line(xs);
+            if (column) {
+                out.matrix.push_back(*column);
+            }
+        } catch(...){
             line_error_counter ++;
             //пропуск ошибочной строки
         }

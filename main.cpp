@@ -16,8 +16,8 @@ gnvoerk(const vector<vector<double>>& xss, ostream& out) {
 
 int
 main(int argc, char* argv[]) {
-    if(argc != 3){
-        cerr << "Usage: " << argv[0] << " in.txt out.txt\n";
+    if(argc != 4){
+        cerr << "Usage: " << argv[0] << " in.txt out.txt matrix.txt\n";
         return 1;
     }
 
@@ -27,13 +27,20 @@ main(int argc, char* argv[]) {
         return 1;
     }
 
-    ofstream out{argv[2]};
-    if (!out.is_open()) {
+    ofstream out_source{argv[2]};
+    if (!out_source.is_open()) {
         cerr << "Unable to write output file.\n";
         return 1;
     }
 
-    auto xss = go(in);
-    gnvoerk(xss, out);
+    ofstream out_matrix{argv[3]};
+    if (!out_matrix.is_open()) {
+        cerr << "Unable to write matrix output file.\n";
+        return 1;
+    }
+
+    auto result = go(in);
+    gnvoerk(result.source, out_source);
+    gnvoerk(result.matrix, out_matrix);
     return 0;
 }
