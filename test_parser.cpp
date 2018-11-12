@@ -1,4 +1,5 @@
 #include "parser.h"
+#include "stream.h"
 
 using namespace std;
 
@@ -51,7 +52,8 @@ main() {
             "{\"ts\":3437,\"rt\":{\"s\":135,\"A\":\"0x100\","
             "\"A_euid\":\"0x10205fe110001d4e\"},\"A_baro_cm\":24740}"
     };
-    auto v5 = go(in5).source;
+    Stream stream{in5};
+    auto v5 = go(stream).source;
     assert((v5 == vector<vector<double>>{
             {
                     1,

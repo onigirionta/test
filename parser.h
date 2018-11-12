@@ -1,9 +1,12 @@
 #pragma once
 
+#include "input.h"
+
+#include "json.hpp"
+
 #include <iostream>
 #include <optional>
 #include <sstream>
-#include "json.hpp"
 
 using json = nlohmann::json;
 
@@ -99,26 +102,27 @@ private:
     bool _has_data;
 };
 
-struct OfflineResult {
+struct Result {
     vector<vector<double>> source;
     vector<vector<double>> matrix;  // column-major (array of columns)
 };
 
-OfflineResult
-go(istream& in) {
+Result
+go(Source& in) {
     ColumnExtractor ce;
 
-    OfflineResult out;
+    Result out;
 
     int line_counter = 0;
     int line_error_counter = 0;
-    while (in) {
+    while (true) {
         string line;
-        getline(in, line);
-        if (!in && in.eof()) {
+        try {
+            line = read_line(in);
+            line_counter++;
+        } catch (const EOFError&) {
             break;
         }
-        line_counter++;
 
         try {
             const auto xs = parse_line(line);
