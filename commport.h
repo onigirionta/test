@@ -70,6 +70,9 @@ CommPort::read(void* buffer, size_t size) {
     const auto result = ::ReadFile(_handle, buffer, size, &bytes_read, nullptr);
     if (!result) {
         const auto error_code = GetLastError();
+        if (error_code == ERROR_OPERATION_ABORTED) {
+            throw EOFError{};
+        }
         throw std::runtime_error("Unable to read data from ComPort, error code " + std::to_string(error_code));
     }
     return bytes_read;
