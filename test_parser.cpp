@@ -53,7 +53,7 @@ main() {
             "\"A_euid\":\"0x10205fe110001d4e\"},\"A_baro_cm\":24740}"
     };
     Stream stream{in5};
-    auto v5 = go(stream).source;
+    auto v5 = Collector{}.collect(stream).source;
     assert((v5 == vector<vector<double>>{
             {
                     1,

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "input.h"
+#include "terminate.h"
 
 #include "json.hpp"
 
@@ -107,15 +108,26 @@ struct Result {
     vector<vector<double>> matrix;  // column-major (array of columns)
 };
 
+class Collector : public Stoppable {
+public:
+    Result collect(Source& in);
+    void stop() override;
+
+private:
+    bool _running{false};
+};
+
 Result
-go(Source& in) {
+Collector::collect(Source& in) {
     ColumnExtractor ce;
 
     Result out;
 
     int line_counter = 0;
     int line_error_counter = 0;
-    while (true) {
+
+    _running = true;
+    while (_running) {
         string line;
         try {
             line = read_line(in);
@@ -150,4 +162,9 @@ go(Source& in) {
     cerr << "Lines processed: " << line_counter
          <<"\nError lines: " << line_error_counter << "\n";
     return out;
+}
+
+void
+Collector::stop() {
+    _running = false;
 }

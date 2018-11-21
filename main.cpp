@@ -53,27 +53,31 @@ main(int argc, const char* argv[]) {
 
     ofstream out_source{options->source_path};
     if (!out_source.is_open()) {
-        cerr << "Unable to write output file.\n";
+        cerr << "Unable to write output file '" << options->source_path << "'.\n";
         return 1;
     }
 
     ofstream out_matrix{options->matrix_path};
     if (!out_matrix.is_open()) {
-        cerr << "Unable to write matrix output file.\n";
+        cerr << "Unable to write matrix output file '" << options->matrix_path << "'.\n";
         return 1;
     }
 
     try {
+        Collector collector;
+
+        Terminator::setup(collector);
+
         Result result;
         switch (options->input_type) {
         case Input::File: {
             File file{options->input_path};
-            result = go(file);
+            result = collector.collect(file);
             break;
         }
         case Input::COM: {
             CommPort port{options->input_path};
-            result = go(port);
+            result = collector.collect(port);
             break;
         }
         }
